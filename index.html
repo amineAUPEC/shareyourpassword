@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share your password [ it's awesome ]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .leaderboard {
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Share your password [ it's awesome ]</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPasswordModal">
+            Add New Password
+        </button>
+        <div class="modal fade" id="addPasswordModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add New Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addPasswordForm" method="POST" data-netlify="true" >
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="text" class="form-control" id="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="details" class="form-label">Details</label>
+                                <textarea class="form-control" id="details" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h2>Leaderboard</h2>
+                <div class="leaderboard" id="leaderboard">
+                    <ul id="passwordList" class="list-group">
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>Search</h2>
+                <input type="text" class="form-control" id="searchInput" placeholder="Search passwords">
+                <ul id="searchResults" class="list-group mt-3">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script>
+        let passwords = [];
+
+        document.getElementById('addPasswordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const details = document.getElementById('details').value;
+            const existingPassword = passwords.find((pass) => pass.password === password);
+            if (existingPassword) {
+                existingPassword.count++;
+            } else {
+                passwords.push({ password, details, count: 1 });
+            }
+            updateLeaderboard();
+            document.getElementById('addPasswordForm').reset();
+            document.getElementById('addPasswordModal').classList.remove('show');
+        });
+
+        function updateLeaderboard() {
+            passwords.sort((a, b) => b.count - a.count);
+            const passwordList = document.getElementById('passwordList');
+            passwordList.innerHTML = '';
+            passwords.forEach((password) => {
+                const li = document.createElement('li');
+                li.textContent = `${password.password} (${password.count}) - ${password.details}`;
+                li.className = 'list-group-item';
+                passwordList.appendChild(li);
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', () => {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            passwords.forEach((password) => {
+                if (password.password.toLowerCase().includes(searchQuery) || password.details.toLowerCase().includes(searchQuery)) {
+                    const li = document.createElement('li');
+                    li.textContent = `${password.password} (${password.count}) - ${password.details}`;
+                    li.className = 'list-group-item';
+                    searchResults.appendChild(li);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
